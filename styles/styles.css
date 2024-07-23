@@ -52,7 +52,7 @@ body { background-color: lightgray; }
   background-color: black;
 }
 
-#board .plug:hover {
+#board .plug.selected {
   background-color: darkred;
 }
 

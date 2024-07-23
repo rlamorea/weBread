@@ -17,7 +17,7 @@ class Plug {
       this.span.dataset[key] = extraData[key]
     }
     this.span.addEventListener('mouseenter', () => { this.mouseEnter() })
-    this.span.addEventListener('mouseleave', () => { this.board.hideHighlight() })
+    this.span.addEventListener('mouseleave', () => { this.mouseLeave() })
     this.span.addEventListener('click', () => { this.clicked() })
     parentDiv.appendChild(this.span)
     if (options.state) {
@@ -27,8 +27,19 @@ class Plug {
 
   mouseEnter() {
     if (this.status !== 'open') { return }
+    if (this.rail.type !== 'pin-top' && this.rail.type !== 'pin-bottom') {
+      this.span.classList.add('selected')
+    }
     this.board.moveGridHighlightTo(this.span)
     this.rail.highlight()
+  }
+
+  mouseLeave() {
+    this.rail.highlight(false)
+    this.board.hideHighlight()
+    if (this.rail.type !== 'pin-top' && this.rail.type !== 'pin-bottom') {
+      this.span.classList.remove('selected')
+    }
   }
 
   clicked() {

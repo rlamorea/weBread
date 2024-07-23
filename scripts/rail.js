@@ -23,8 +23,29 @@ class Rail {
     }
   }
 
-  highlight() {
+  highlight(show = true) {
     this.board.moveRailHighlightTo(this.plugs[0].span, this.plugs.at(-1).span)
+    if (this.type === 'pin-top' || this.type === 'pin-bottom') {
+      if (show) {
+        const start = (this.type === 'pin-top') ? 0 : this.plugs.length - 1
+        const end = (this.type === 'pin-top') ? this.plugs.length - 1 : 0
+        const inc = (this.type === 'pin-top') ? 1 : -1
+        for (let plugIndex = start; plugIndex !== end; plugIndex += inc) {
+          const plug = this.plugs[plugIndex]
+          if (plug.status === 'open') {
+            plug.span.classList.add('selected')
+            break
+          }
+        }
+      } else {
+        for (const plug of this.plugs) {
+          if (plug.span.classList.contains('selected')) {
+            plug.span.classList.remove('selected')
+            break
+          }
+        }
+      }
+    }
   }
 
   checkVariant(ignorePlug, newVariant = null) {
