@@ -123,3 +123,17 @@ body { background-color: lightgray; }
   left: 0;
   pointer-events: none;
 }
+#board .wirelayer.interactive {
+  z-index: 45;
+  pointer-events: auto;
+  background-color: rgba(0,0,0,0.3);
+  cursor: crosshair;
+}
+
+#board .plug-marker {
+  position: absolute;
+  z-index: 44;
+  border-radius: 6px;
+  width: 12px;
+  height: 12px;
+}

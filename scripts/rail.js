@@ -5,6 +5,7 @@ class Rail {
     this.board = board
     this.type = type
     this.index = index
+    this.outerPlug = null
 
     this.powerPlug = null
     this.groundPlug = null
@@ -20,32 +21,12 @@ class Rail {
         const row = parent.querySelector(`.plugrow:nth-child(${rowIndex+1})`)
         this.plugs.push(new Plug(board, this, row, type, index, rowIndex))
       }
+      this.getOuterPlug()
     }
   }
 
   highlight(show = true) {
     this.board.moveRailHighlightTo(this.plugs[0].span, this.plugs.at(-1).span)
-    if (this.type === 'pin-top' || this.type === 'pin-bottom') {
-      if (show) {
-        const start = (this.type === 'pin-top') ? 0 : this.plugs.length - 1
-        const end = (this.type === 'pin-top') ? this.plugs.length - 1 : 0
-        const inc = (this.type === 'pin-top') ? 1 : -1
-        for (let plugIndex = start; plugIndex !== end; plugIndex += inc) {
-          const plug = this.plugs[plugIndex]
-          if (plug.status === 'open') {
-            plug.span.classList.add('selected')
-            break
-          }
-        }
-      } else {
-        for (const plug of this.plugs) {
-          if (plug.span.classList.contains('selected')) {
-            plug.span.classList.remove('selected')
-            break
-          }
-        }
-      }
-    }
   }
 
   checkVariant(ignorePlug, newVariant = null) {
@@ -59,5 +40,25 @@ class Rail {
     if (sharedVariant !== newVariant) {
       for (const plug of this.plugs) { plug.setVariant(newVariant) }
     }
+  }
+
+  getOuterPlug() {
+    if (!this.type.startsWith('pin')) { return }
+    let plug = this
+    let start = 0, end = this.plugs.length - 1, inc = 1
+    if (this.type === 'pin-bottom') {
+      start = end; end = 0; inc = -1
+    }
+    for (let plugIndex = start; plugIndex !== end; plugIndex += inc) {
+      const testPlug = this.plugs[plugIndex]
+      if (testPlug.status === 'open') { plug = testPlug; break; }
+    }
+    this.outerPlug = plug
+    return plug
+  }
+
+  plugClicked(plug) {
+    plug = this.outerPlug || plug
+    this.board.plugClicked(plug)
   }
 }

@@ -1,12 +1,15 @@
 class Wire {
   constructor(from, to, options) {
-    this.wireId = Wire.wireId++
-    this.from = from
-    this.fromElem = (from instanceof Plug) ? from.span : from
-    this.to = to
-    this.toElem = (to instanceof Plug) ? to.span : to
+    this.wireId = options.id || Wire.wireId++
+    const fromElem = (from instanceof Plug) ? from.span : from
+    this.from = (from.left && from.top) ? from : { left: fromElem.offsetLeft, top: fromElem.offsetTop}
+    if (!options.aligned) { this.from = Wire.gridAlign(this.from) }
+    const toElem = (to instanceof Plug) ? to.span : to
+    this.to = (to.left && to.top) ? to : { left: toElem.offsetLeft, top: toElem.offsetTop }
+    if (!options.aligned) { this.to = Wire.gridAlign(this.to) }
     this.color = options.color || Wire.nextColor()
     this.power = options.power
+    this.svg = options.svg || Wire.svg
 
     if (this.power) {
       this.color = options.power === 'power' ? 'red' : 'black'
@@ -20,7 +23,8 @@ class Wire {
       this.drawWire(path)
       if (this.to instanceof Plug) { this.to.setStatus(this.power) }
     } else {
-
+      let path = [ this.from, this.to ]
+      this.drawWire(path)
     }
   }
 
@@ -39,11 +43,11 @@ class Wire {
       command = 'L'
     }
     wirePath.setAttribute('d', pathStr.trim())
-    Wire.svg.appendChild(wirePath)
+    this.svg.appendChild(wirePath)
   }
 
   eraseWire() {
-    const wirePath = Wire.svg.querySelector(`#wire-${this.wireId}`)
+    const wirePath = this.svg.querySelector(`#wire-${this.wireId}`)
     wirePath.remove()
     if (this.to instanceof Plug) { this.to.setStatus('open') }
   }

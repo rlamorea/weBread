@@ -12,6 +12,7 @@ class Plug {
     this.span = document.createElement('span')
     this.span.classList.add('plug')
     if (this.variant) { this.span.classList.add(this.variant) }
+    this.span.plugPointer = this
     const extraData = options.data || {}
     for (const key in extraData) {
       this.span.dataset[key] = extraData[key]
@@ -25,11 +26,14 @@ class Plug {
     }
   }
 
+  plugSpan() {
+    const plug = this.rail.outerPlug || this
+    return plug.span
+  }
+
   mouseEnter() {
     if (this.status !== 'open') { return }
-    if (this.rail.type !== 'pin-top' && this.rail.type !== 'pin-bottom') {
-      this.span.classList.add('selected')
-    }
+    this.plugSpan().classList.add('selected')
     this.board.moveGridHighlightTo(this.span)
     this.rail.highlight()
   }
@@ -37,13 +41,11 @@ class Plug {
   mouseLeave() {
     this.rail.highlight(false)
     this.board.hideHighlight()
-    if (this.rail.type !== 'pin-top' && this.rail.type !== 'pin-bottom') {
-      this.span.classList.remove('selected')
-    }
+    this.plugSpan().classList.remove('selected')
   }
 
   clicked() {
-    // TODO
+    this.rail.plugClicked(this)
   }
 
   setStatus(newStatus) {

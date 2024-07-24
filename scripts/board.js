@@ -43,6 +43,8 @@ class Board {
     this.powerWires = []
 
     Wire.initialize(this)
+
+    this.wiringLayer = new WiringLayer(this)
   }
 
   addLabel(div, label) {
@@ -179,5 +181,9 @@ class Board {
         this.powerWires.push(new Wire(fromNode, toNode, { power }))
       }
     }
+  }
+
+  plugClicked(plug) {
+    this.wiringLayer.activateForPlug(plug)
   }
 }
