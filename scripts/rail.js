@@ -5,6 +5,7 @@ class Rail {
     this.board = board
     this.type = type
     this.index = index
+    this.outerPlug = null
 
     this.powerPlug = null
     this.groundPlug = null
@@ -20,10 +21,12 @@ class Rail {
         const row = parent.querySelector(`.plugrow:nth-child(${rowIndex+1})`)
         this.plugs.push(new Plug(board, this, row, type, index, rowIndex))
       }
+      this.getOuterPlug()
     }
+    this.connectedCount = 0 // ignores power/ground plugs
   }
 
-  highlight() {
+  highlight(show = true) {
     this.board.moveRailHighlightTo(this.plugs[0].span, this.plugs.at(-1).span)
   }
 
@@ -31,12 +34,44 @@ class Rail {
     let sharedVariant = null
     for (const plug of this.plugs) {
       if (plug === ignorePlug) { continue }
-      if (plug.variant === 'powered' || plug.variant === 'grounded') { sharedVariant = plug.status }
+      if (plug.variant === 'powered' || plug.variant === 'grounded') { sharedVariant = plug.variant }
     }
     if (this.powerPlug && this.powerPlug !== ignorePlug && this.powerPlug.variant === 'powered') { sharedVariant = 'powered' }
     if (this.groundPlug && this.groundPlug !== ignorePlug && this.groundPlug.variant === 'grounded') { sharedVariant = 'grounded' }
     if (sharedVariant !== newVariant) {
       for (const plug of this.plugs) { plug.setVariant(newVariant) }
     }
+  }
+
+  getOuterPlug() {
+    if (!this.type.startsWith('pin')) { return }
+    let plug = this
+    let start = 0, end = this.plugs.length - 1, inc = 1
+    if (this.type === 'pin-bottom') {
+      start = end; end = 0; inc = -1
+    }
+    for (let plugIndex = start; plugIndex !== end; plugIndex += inc) {
+      const testPlug = this.plugs[plugIndex]
+      if (testPlug.status === 'open') { plug = testPlug; break; }
+    }
+    this.outerPlug = plug
+    return plug
+  }
+
+  plugClicked(plug, e) {
+    plug = this.outerPlug || plug
+    this.board.plugClicked(plug, e)
+  }
+
+  plugRewired(plug) {
+    this.getOuterPlug() // update outer plug if needed
+    this.connectedCount = -1 // force recalc on next call
+  }
+
+  plugsWired() {
+    if (this.connectedCount < 0) {
+      this.connectedCount = this.plugs.reduce((n, x) => n + (x.status !== 'open'), 0)
+    }
+    return this.connectedCount
   }
 }

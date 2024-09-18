@@ -52,7 +52,7 @@ body { background-color: lightgray; }
   background-color: black;
 }
 
-#board .plug:hover {
+#board .plug.selected {
   background-color: darkred;
 }
 
@@ -123,3 +123,72 @@ body { background-color: lightgray; }
   left: 0;
   pointer-events: none;
 }
+#board .wirelayer.interactive {
+  z-index: 45;
+  pointer-events: auto;
+  background-color: rgba(0,0,0,0.3);
+  cursor: crosshair;
+}
+#board .wirelayer.interactive.nowire {
+  cursor: not-allowed;
+}
+#board .wirelayer.interactive.editing {
+  cursor: default;
+  z-index: 43;
+}
+
+#board .plug-marker {
+  position: absolute;
+  z-index: 44;
+  border-radius: 6px;
+  width: 12px;
+  height: 12px;
+}
+#board .wirelayer.interactive.editing .plug-marker {
+  border: solid 2px black;
+  width: 8px;
+  height: 8px;
+  cursor: pointer;
+}
+#board .wirelayer.interactive.editing i {
+  position: absolute;
+  display: block;
+  z-index: 46;
+  border: solid 2px #888888;
+  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  line-height: 20px;
+  font-size: 16px;
+  font-family: monospace;
+  right: 10px;
+  font-style: normal;
+  color: #888888;
+  background-color: #dddddd;
+  cursor: pointer;
+}
+#board .wirelayer.interactive.editing i:hover {
+  border-color: black;
+  color: black;
+  background-color: white;
+}
+#board .wirelayer.interactive.editing i.delete { top: 10px; }
+#board .wirelayer.interactive.editing i.up { top: 40px; }
+#board .wirelayer.interactive.editing i.down { top: 70px; }
+
+#board .wirelayer.interactive .color {
+  position: absolute;
+  display: block;
+  z-index: 46;
+  border: solid 2px #888888;
+  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  left: 10px;
+  opacity: 0.6;
+  background-color: white;
+}
+#board .wirelayer.interactive .color:hover { opacity: 1; }
+#board .wirelayer.interactive .color.selected { opacity: 1; border-color: black; }

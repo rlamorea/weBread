@@ -15,6 +15,7 @@ class Board {
       chips: CHIP_ROWS,
       pins: PIN_ROWS
     }
+    this.div.addEventListener('click', (e) => { this.clicked(e) })
 
     this.rails = []
     this.chipRails = []
@@ -43,6 +44,8 @@ class Board {
     this.powerWires = []
 
     Wire.initialize(this)
+
+    this.wiringLayer = new WiringLayer(this)
   }
 
   addLabel(div, label) {
@@ -81,7 +84,7 @@ class Board {
     }
   }
 
-  addPinRails(location, index) {
+  addPinRails(location, chipRow) {
     const pinBlock = document.createElement('div')
     pinBlock.classList.add('pin-block')
     this.div.appendChild(pinBlock)
@@ -91,8 +94,9 @@ class Board {
       this.addLabel(row, String.fromCharCode(65 + rowIndex))
       rows.push(row)
     }
+    const index = chipRow * BOARD_WIDTH
     for (let col = 0; col < BOARD_WIDTH; col++) {
-      this.chipRails[index][location] = new Rail(this, pinBlock, `pin-${location}`, index)
+      this.chipRails[chipRow][location] = new Rail(this, pinBlock, `pin-${location}`, index + col)
     }
     for (let row = 0; row < PIN_ROWS; row++) {
       this.addLabel(rows[row], String.fromCharCode(65 + row))
@@ -132,14 +136,22 @@ class Board {
     const node = document.createElement('div')
     node.classList.add('power', type)
     node.innerHTML = text
-    node.addEventListener('click', e => { this.cyclePowerConnection() })
+    node.addEventListener('click', (e) => { this.cyclePowerConnection(e) })
     this.div.appendChild(node)
     return node
   }
 
-  cyclePowerConnection() {
+  cyclePowerConnection(e) {
+    e.stopPropagation()
     let powerIdx = (POWER_CONNECTION_METHODS.indexOf(this.powerConnectionMethod) + 1) % POWER_CONNECTION_METHODS.length
     this.powerConnectionMethod = POWER_CONNECTION_METHODS[powerIdx]
+
+    // check to see if power rails are wired to anything -- if so, cannot cycle power connection
+    const totalWiredInRails = this.rails.reduce((n, x) => n + x.plugsWired(), 0)
+    if (totalWiredInRails > 0) {
+      // TODO: provide warning message as to why
+      return
+    }
 
     // remove existing wires
     for (const wire of this.powerWires) {
@@ -179,5 +191,19 @@ class Board {
         this.powerWires.push(new Wire(fromNode, toNode, { power }))
       }
     }
+  }
+
+  plugClicked(plug, e) {
+    if (!this.clicked(e)) { return } // nothing more to do
+    this.wiringLayer.activateForPlug(plug)
+  }
+
+  clicked(event) {
+    const wires = Wire.getWiresForPoint(event.pageX, event.pageY)
+    if (wires.length > 0) {
+      this.wiringLayer.activateForWires(wires)
+      return false
+    }
+    return true
   }
 }
