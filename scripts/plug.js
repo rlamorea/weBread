@@ -8,6 +8,7 @@ class Plug {
     this.subindex = subindex
     this.status = 'open'
     this.variant = options.variant
+    this.wire = null
 
     this.span = document.createElement('span')
     this.span.classList.add('plug')
@@ -19,7 +20,7 @@ class Plug {
     }
     this.span.addEventListener('mouseenter', () => { this.mouseEnter() })
     this.span.addEventListener('mouseleave', () => { this.mouseLeave() })
-    this.span.addEventListener('click', () => { this.clicked() })
+    this.span.addEventListener('click', (e) => { this.clicked(e) })
     parentDiv.appendChild(this.span)
     if (options.state) {
       this.span.style.visibility = options.state
@@ -44,11 +45,12 @@ class Plug {
     this.plugSpan().classList.remove('selected')
   }
 
-  clicked() {
-    this.rail.plugClicked(this)
+  clicked(e) {
+    this.rail.plugClicked(this, e)
+    e.stopPropagation()
   }
 
-  setStatus(newStatus) {
+  setStatus(newStatus, wire) {
     this.span.classList.remove(this.status)
     if (this.status === 'power' || this.status === 'ground') {
       this.span.style.visibility = 'hidden'
@@ -62,14 +64,20 @@ class Plug {
     }
     if (newStatus === 'open') {
       this.span.classList.remove('inuse')
+      this.wire = null // TODO: disconnect and/or propagate wires
     } else {
+      this.wire = wire
       this.span.classList.add('inuse')
+      this.rail.plugRewired(this)
     }
   }
 
-  setVariant(newVariant) {
+  setVariant(newVariant, propagate = true) {
     if (this.variant) { this.span.classList.remove(this.variant) }
     this.variant = newVariant
     if (this.variant) { this.span.classList.add(this.variant) }
+    if (propagate && this.wire) {
+      this.wire.propagateVariant(newVariant)
+    }
   }
 }

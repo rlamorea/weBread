@@ -23,6 +23,7 @@ class Rail {
       }
       this.getOuterPlug()
     }
+    this.connectedCount = 0 // ignores power/ground plugs
   }
 
   highlight(show = true) {
@@ -33,7 +34,7 @@ class Rail {
     let sharedVariant = null
     for (const plug of this.plugs) {
       if (plug === ignorePlug) { continue }
-      if (plug.variant === 'powered' || plug.variant === 'grounded') { sharedVariant = plug.status }
+      if (plug.variant === 'powered' || plug.variant === 'grounded') { sharedVariant = plug.variant }
     }
     if (this.powerPlug && this.powerPlug !== ignorePlug && this.powerPlug.variant === 'powered') { sharedVariant = 'powered' }
     if (this.groundPlug && this.groundPlug !== ignorePlug && this.groundPlug.variant === 'grounded') { sharedVariant = 'grounded' }
@@ -57,8 +58,20 @@ class Rail {
     return plug
   }
 
-  plugClicked(plug) {
+  plugClicked(plug, e) {
     plug = this.outerPlug || plug
-    this.board.plugClicked(plug)
+    this.board.plugClicked(plug, e)
+  }
+
+  plugRewired(plug) {
+    this.getOuterPlug() // update outer plug if needed
+    this.connectedCount = -1 // force recalc on next call
+  }
+
+  plugsWired() {
+    if (this.connectedCount < 0) {
+      this.connectedCount = this.plugs.reduce((n, x) => n + (x.status !== 'open'), 0)
+    }
+    return this.connectedCount
   }
 }
