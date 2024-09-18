@@ -69,7 +69,7 @@ class WiringLayer {
       colorDiv.addEventListener('click', (e) => { this.colorClicked(e) })
 
       bottom -= 30
-    }
+      }
 
     this.mode = 'none'
   }
